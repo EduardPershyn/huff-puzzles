@@ -14,5 +14,63 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-   
- }
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
+
+    // Jump to the implementation of the sumArray function if the calldata matches the function selector
+    __FUNC_SIG(distribute) eq distribute jumpi
+
+    0x00 0x00 revert
+
+    distribute:
+        DISTRIBUTE()
+}
+
+#define macro DISTRIBUTE() = takes(0) returns(0) {
+    0x04             // function signature size
+    dup1
+    calldataload     // get the location of the array [location, 0x04]
+    add              //                               [location + 0x04]
+    dup1             //                               [location + 0x04, location + 0x04]
+    calldataload     // first elem - array length     [length, location + 0x04]
+
+    dup1 iszero rev jumpi
+    dup1 callvalue div                             // [prize, length, location + 0x04]
+    swap2 swap1                                    // [length, location + 0x04, prize]
+
+    loop:
+        dup1 iszero ret jumpi         // return if 0  [length, location, prize]
+
+        swap1                  // [location, length, prize]
+        0x20 add               // [location+0x20, length, prize]
+        dup1                   // [location+0x20, location+0x20, length, prize]
+        calldataload           // [1 element, location+0x20, length, prize]
+
+        swap1                  // [location+0x20, 1 element, length, prize]
+        swap2                  // [length, 1 element, location+0x20, prize]
+        swap3                  // [prize, 1 element, location+0x20, length]
+        dup1 swap2             // [1 element, prize, prize, location+0x20, length]
+        SEND()
+
+        swap2                  // [length, location+0x20, prize]
+        0x01                   // [0x01, length, location+0x20, prize]
+        swap1                  // [length, 0x01, location+0x20, prize]
+        sub                    // [length-1, location+0x20, prize]
+        loop jump
+
+    ret:
+        0x00 0x00 return
+
+    rev:
+        0x00 0x00 revert
+}
+
+#define macro SEND() = takes(2) returns(0) {
+    0x00 0x00 0x00 0x00 swap4   // [1 element, 0x00, 0x00, 0x00, 0x00, prize, location+0x20, length]
+    swap1 swap5 swap1           // [1 element, prize, 0x00, 0x00, 0x00, 0x00, location+0x20, length]
+    gas call
+    pop
+}

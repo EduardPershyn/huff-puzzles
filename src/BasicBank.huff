@@ -8,9 +8,68 @@
  *      - keeping track of and viewing balance
  */
 
+#define constant MAP_SLOT = FREE_STORAGE_POINTER()
+
 #define function balanceOf(address) payable returns(uint256)
 #define function withdraw(uint256) payable returns()
 
 #define macro MAIN() = takes(0) returns(0) {
+    callvalue receive jumpi
 
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
+
+    // Jump to the implementation of the value function if the calldata matches the function selector
+    dup1 __FUNC_SIG(balanceOf) eq balanceOf jumpi
+    __FUNC_SIG(withdraw) eq withdraw jumpi
+
+    0x00 0x00 return
+
+    balanceOf:
+        BALANCE_OF()
+
+    withdraw:
+        WITHDRAW()
+
+    receive:
+        GET_MAP_KEY_SLOT()
+        dup1 sload callvalue add
+        swap1 sstore
+}
+
+#define macro GET_MAP_KEY_SLOT() = takes(0) returns(1) {
+    caller            0x00  mstore
+    [MAP_SLOT]  sload 0x20  mstore
+
+    0x40 0x00 sha3
+}
+
+#define macro BALANCE_OF() = takes(0) returns(0) {
+    GET_MAP_KEY_SLOT()
+    sload
+
+    0x00  mstore
+    0x20 0x00 return
+}
+
+#define macro WITHDRAW() = takes(0) returns(0) {
+    GET_MAP_KEY_SLOT() dup1 sload //[key_value, key_slot]
+    0x04 calldataload             //[calldata, key_value, key_slot]
+    dup2 dup2 gt rev jumpi
+
+    dup2                          //[key_value, calldata, key_value, key_slot]
+    sub                           //[key_value - calldata, key_value, key_slot]
+    swap1 swap2                   //[key_slot, key_value - calldata, key_value]
+    sstore                        //[key_value]
+
+    0x00 0x00 0x00 0x00 swap4
+    caller gas call
+
+    0x00 0x00 return
+
+    rev:
+       0x00 0x00 revert
 }
