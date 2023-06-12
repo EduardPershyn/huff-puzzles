@@ -9,6 +9,8 @@ interface Donations {
     function donated(address user) external view returns (uint256);
 }
 
+import "forge-std/console.sol";
+
 contract DonationsTest is Test {
     Donations public donations;
 
@@ -59,5 +61,7 @@ contract DonationsTest is Test {
             0.8 ether,
             "expected donated balance of address(0xCAFE) to be 0.8 ether"
         );
+
+        console.logUint(address(donations).balance);
     }
 }

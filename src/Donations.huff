@@ -7,6 +7,42 @@
 
 #define function donated(address) payable returns(uint256)
 
+#define constant MAP_SLOT = FREE_STORAGE_POINTER()
+
 #define macro MAIN() = takes(0) returns(0) {
-    
+    callvalue receive jumpi
+
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
+
+    // Jump to the implementation of the value function if the calldata matches the function selector
+    __FUNC_SIG(donated) eq donated jumpi
+
+    0x00 0x00 return
+
+    donated:
+        DONATED()
+
+    receive:
+        GET_MAP_KEY_SLOT()
+        dup1 sload callvalue add
+        swap1 sstore
+}
+
+#define macro GET_MAP_KEY_SLOT() = takes(0) returns(1) {
+    caller            0x00  mstore
+    [MAP_SLOT]  sload 0x20  mstore
+
+    0x40 0x00 sha3
+}
+
+#define macro DONATED() = takes(0) returns(0) {
+    GET_MAP_KEY_SLOT()
+    sload
+
+    0x00  mstore
+    0x20 0x00 return
 }

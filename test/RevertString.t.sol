@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import {HuffConfig} from "foundry-huff/HuffConfig.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
+import "forge-std/console.sol";
+
 interface RevertString {}
 
 contract RevertStringTest is Test {
@@ -21,6 +23,10 @@ contract RevertStringTest is Test {
             ""
         );
         require(!success, "call expected to fail");
+        console.logString("Only Huff");
+        console.logBytes(bytes("Only Huff"));
+        console.logBytes(revertData);
+        console.logBytes(abi.decode(revertData, (bytes)));
         assertEq(
             keccak256(bytes("Only Huff")),
             keccak256(abi.decode(revertData, (bytes))),

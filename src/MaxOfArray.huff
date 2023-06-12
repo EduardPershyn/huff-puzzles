@@ -10,5 +10,65 @@
 #define function maxOfArray(uint256[]) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-   
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
+
+    // Jump to the implementation of the maxOfArray function if the calldata matches the function selector
+    __FUNC_SIG(maxOfArray) eq maxOfArray jumpi
+
+    0x00 0x00 revert
+
+    maxOfArray:
+        ARRAY_MAX()
+}
+
+#define macro ARRAY_MAX() = takes(0) returns(0) {
+    0x00             // init max
+    0x04             // function signature size
+    dup1
+    calldataload     // get the location of the array [location, 0x04, 0x00]
+    add              //                               [location + 0x04, 0x00]
+    dup1             //                               [location + 0x04, location + 0x04, 0x00]
+    calldataload     // first elem - array length     [length, location + 0x04, 0x00]
+
+    dup1
+    iszero rev jumpi
+
+    loop:
+        dup1                   // array length [length, length, location, 0x00]
+        0x00 eq ret jumpi      // return if 0  [length, location, 0x00]
+
+        swap1                  // [location, length, 0x00]
+        0x20 add               // [location+0x20, length, 0x00]
+        dup1                   // [location+0x20, location+0x20, length, 0x00]
+        calldataload           // [1 element, location+0x20, length, 0x00]
+
+        swap1                  // [location+0x20, 1 element, length, 0x00]
+        swap2                  // [length, 1 element, location+0x20, 0x00]
+        swap3                  // [0x00, 1 element, location+0x20, length]
+
+        dup2
+        dup2                   // [0x00, 1 element, 0x00, 1 element, location+0x20, length]
+        lt pop_point jumpi     // [0x00, 1 element, location+0x20, length]
+        swap1                  // [1 element, 0x00, location+0x20, length]
+        pop_point:
+            pop
+
+        swap2                  // [length, location+0x20, max]
+        0x01                   // [0x01, length, location+0x20, max]
+        swap1                  // [length, 0x01, location+0x20, max]
+        sub                    // [length-1, location+0x20, max]
+        loop jump
+
+    ret:
+        pop
+        pop
+        0x00 mstore           // place the result in memory
+        0x20 0x00 return      // return the result
+
+    rev:
+        0x00 0x00 revert
 }

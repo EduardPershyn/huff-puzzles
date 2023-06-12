@@ -12,5 +12,53 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
 
+    // Jump to the implementation of the sumArray function if the calldata matches the function selector
+    __FUNC_SIG(sumArray) eq sumArray jumpi
+
+    0x00 0x00 revert
+
+    sumArray:
+        SUM_ARRAY()
+}
+
+#define macro SUM_ARRAY() = takes(0) returns(0) {
+    0x00             // init sum
+    0x04             // function signature size
+    dup1
+    calldataload     // get the location of the array [location, 0x04, 0x00]
+    add              //                               [location + 0x04, 0x00]
+    dup1             //                               [location + 0x04, location + 0x04, 0x00]
+    calldataload     // first elem - array length     [length, location + 0x04, 0x00]
+
+    loop:
+        dup1                   // array length [length, length, location, 0x00]
+        0x00 eq ret jumpi      // return if 0  [length, location, 0x00]
+
+        swap1                  // [location, length, 0x00]
+        0x20 add               // [location+0x20, length, 0x00]
+        dup1                   // [location+0x20, location+0x20, length, 0x00]
+        calldataload           // [1 element, location+0x20, length, 0x00]
+
+        swap1                  // [location+0x20, 1 element, length, 0x00]
+        swap2                  // [length, 1 element, location+0x20, 0x00]
+        swap3                  // [0x00, 1 element, location+0x20, length]
+        add                    // [sum, location+0x20, length]
+
+        swap2                  // [length, location+0x20, sum]
+        0x01                   // [0x01, length, location+0x20, sum]
+        swap1                  // [length, 0x01, location+0x20, sum]
+        sub                    // [length-1, location+0x20, sum]
+        loop jump
+
+    ret:
+        pop
+        pop
+        0x00 mstore           // place the result in memory
+        0x20 0x00 return      // return the result
 }

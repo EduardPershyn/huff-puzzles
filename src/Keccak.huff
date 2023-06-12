@@ -9,5 +9,23 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00
+    loop:
+        dup1
+        dup1
+        calldataload
+        swap1
+        mstore
+
+        0x20 add
+        calldatasize
+        dup2
+        lt iszero ret jumpi
+        loop jump
+
+
+    ret:
+        0x00 sha3
+        0x00 mstore
+        0x20 0x00 return
  }

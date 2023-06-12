@@ -9,6 +9,8 @@ interface Create {
     function makeContract() external returns (address);
 }
 
+import "forge-std/console.sol";
+
 contract CreateTest is Test, NonMatchingSelectorHelper {
     Create public create;
 
@@ -23,9 +25,11 @@ contract CreateTest is Test, NonMatchingSelectorHelper {
             true,
             "new contract cannot be address 0"
         );
+        console.logAddress(newContract);
 
         (bool success, bytes memory data) = newContract.call("");
         require(success, "check return of new contract failed");
+        console.logBytes(data);
         assertEq(
             abi.decode(data, (bytes32)),
             0x00000000000000000000000000000000000000000000000000000000000caffe,

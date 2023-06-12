@@ -16,5 +16,34 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
 
+    dup1
+
+    // Jump to the implementation of the ADD1 function if the calldata matches the function selector
+    __FUNC_SIG(foo) eq foo jumpi
+    __FUNC_SIG(bar) eq bar jumpi
+
+    0x00 0x00 revert
+
+    foo:
+        FOO()
+    bar:
+        BAR()
+}
+
+#define macro FOO() = takes(0) returns(0) {
+    0x02
+    0x00 mstore           // place the result in memory
+    0x20 0x00 return      // return the result
+}
+
+#define macro BAR() = takes(0) returns(0) {
+    0x03
+    0x00 mstore           // place the result in memory
+    0x20 0x00 return      // return the result
 }

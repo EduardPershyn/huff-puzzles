@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import {HuffConfig} from "foundry-huff/HuffConfig.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
+import "forge-std/console.sol";
+
 contract KeccakTest is Test {
     address public keccak;
 
@@ -15,6 +17,8 @@ contract KeccakTest is Test {
     function testKeccak() public /**bytes memory data*/ {
         bytes memory data = hex"abcd";
         bytes32 expectedHash = keccak256(abi.encode(data));
+        console.logBytes(abi.encode(data));
+        console.logBytes32(expectedHash);
 
         (bool success, bytes memory res) = keccak.call(abi.encode(data));
         require(success, "call failed");
