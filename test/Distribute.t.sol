@@ -26,32 +26,32 @@ contract DistributeTest is Test, NonMatchingSelectorHelper {
         vm.deal(address(this), 4 ether);
         distributor.distribute{value: 4 ether}(addresses);
 
-//        assertEq(
-//            addresses[0].balance,
-//            1 ether,
-//            "balance of address 0xBab is not 1 ether"
-//        );
-//        assertEq(
-//            addresses[1].balance,
-//            1 ether,
-//            "balance of address 0xBeb is not 1 ether"
-//        );
-//        assertEq(
-//            addresses[2].balance,
-//            1 ether,
-//            "balance of address 0xBed is not 1 ether"
-//        );
-//        assertEq(
-//            addresses[3].balance,
-//            1 ether,
-//            "balance of address 0xBad is not 1 ether"
-//        );
-//
-//        assertEq(
-//            address(distributor).balance,
-//            0,
-//            "balance of distribute contract is not 0 ether"
-//        );
+        assertEq(
+            addresses[0].balance,
+            1 ether,
+            "balance of address 0xBab is not 1 ether"
+        );
+        assertEq(
+            addresses[1].balance,
+            1 ether,
+            "balance of address 0xBeb is not 1 ether"
+        );
+        assertEq(
+            addresses[2].balance,
+            1 ether,
+            "balance of address 0xBed is not 1 ether"
+        );
+        assertEq(
+            addresses[3].balance,
+            1 ether,
+            "balance of address 0xBad is not 1 ether"
+        );
+
+        assertEq(
+            address(distributor).balance,
+            0,
+            "balance of distribute contract is not 0 ether"
+        );
     }
 
     /// @notice Test that a non-matching selector reverts
